@@ -17,13 +17,16 @@ function setup() {
 	add_filter( 'manage_pages_columns', __NAMESPACE__ . '\posts_columns', 5 );
 	add_action( 'manage_pages_custom_column', __NAMESPACE__ . '\posts_custom_columns', 5, 2 );
 
-	// File uploads.
+	// Check for file uploads duplicates.
 	add_filter( 'wp_handle_upload_prefilter', __NAMESPACE__ . '\prevent_same_name_file_upload' );
+
+	// Enable custom mime types.
+	add_filter( 'upload_mimes', __NAMESPACE__ . '\custom_mime_types' );
 
 	// Most of the clients do not use this functionality. Disable it.
 	disable_comments_and_menus();
 
-	// WordPress login screen various customizations
+	// WordPress login screen various customizations.
 	login_page_customization();
 }
 
@@ -97,9 +100,9 @@ function login_page_layout() {
 	$blog_name = get_bloginfo( 'name' );
 	?>
 	<style>
-		body.login {
-			font-family: Futura, Avenir, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-		}
+		/*body.login {*/
+		/*	font-family: Avenir, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;*/
+		/*}*/
 
 		body.login::before {
 			background: #1d2327;
@@ -255,4 +258,21 @@ function prevent_same_name_file_upload( $file ) {
 	}
 
 	return $file;
+}
+
+/**
+ * Enable custom mime types.
+ *
+ * @param array $mimes Current allowed mime types.
+ *
+ * @return array Mime types.
+ *
+ * @package Bopper
+ */
+function custom_mime_types( $mimes ) : array {
+	// SVG images.
+	$mimes['svg']  = 'image/svg+xml';
+	$mimes['svgz'] = 'image/svg+xml';
+
+	return $mimes;
 }

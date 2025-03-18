@@ -13,6 +13,14 @@ namespace BopMUPlugin\Blocks;
  * @return void
  */
 function setup() {
+	/**
+	 *  On most client builds we don't actually want to rely on administrators adding random custom fonts. Because
+	 *  doing so can have very strong negative side effects on both the visual appearance of a site but even more
+	 *  importantly the performance of a site. Therefore, the best practice is to already define the correct fonts in
+	 *  the themes theme.json file.
+	 */
+	add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\disable_font_library_ui' );
+
 	// Remove inline Gutenberg CSS.
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\remove_wp_block_library_css', 100 );
 
@@ -29,7 +37,7 @@ function setup() {
 	 *     (bool) Whether separate assets will be loaded.
 	 *     Default false (all block assets are loaded, even when not used).
 	 */
-	add_filter( 'should_load_separate_core_block_assets', '__return_true', 11 );
+	add_filter( 'should_load_separate_core_block_assets', '__return_false', 11 );
 
 	/**
 	 * Prevent loading patterns from the WordPress.org pattern directory.
@@ -48,11 +56,11 @@ function setup() {
  */
 function remove_wp_block_library_css() {
 	// Breaking: removes all block library CSS. Useful, when providing own CSS for core blocks.
-	//wp_dequeue_style( 'wp-block-library' );
+//	wp_dequeue_style( 'wp-block-library' );
 	// Works only if 'should_load_separate_core_block_assets' is FALSE.
-	//wp_dequeue_style( 'global-styles' );
+//	wp_dequeue_style( 'global-styles' );
 	// Remove WooCommerce block css.
-	//wp_dequeue_style( 'wc-block-style' );
+//	wp_dequeue_style( 'wc-block-style' );
 }
 
 /**
@@ -84,4 +92,17 @@ function disable_wpautop_for_gutenberg() {
 	if ( has_filter( 'the_content', 'wpautop' ) && has_blocks() ) {
 		remove_filter( 'the_content', 'wpautop' );
 	}
+}
+
+/**
+ * Disables the font library UI by modifying the editor settings.
+ *
+ * @param array $editor_settings The current settings for the editor.
+ *
+ * @return array The modified editor settings with the font library UI disabled.
+ */
+function disable_font_library_ui( $editor_settings ) {
+	$editor_settings['fontLibraryEnabled'] = false;
+
+	return $editor_settings;
 }
